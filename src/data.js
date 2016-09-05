@@ -1,4 +1,4 @@
-const characters = [
+const characterlist = [
     {
         "name": "3-D Man",
         "id": 1011334,
@@ -8949,4 +8949,4 @@ const characters = [
     }
 ]
 
-export default characters;
+export default characterlist;

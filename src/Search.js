@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import $ from 'jquery';
 import Character from './Character';
-import characters from './data.js'
+import FilterCharacter from './FilterCharacter'
+import characterlist from './data.js'
 
 
 class Search extends Component {
@@ -11,53 +12,44 @@ class Search extends Component {
      userInput: ''
    }
  }
- getData(){
-   console.log(this.refs.superhero1.value);
-  return $.get(
-       `http://gateway.marvel.com:80/v1/public/characters?name=${this.refs.superhero1.value}&apikey=2e264257579ec772309983d87144e044`, function(response) {
-         console.log("Response from API:", response);
-         this.setState({
-           name: response.data.results[0].name,
-           id: response.data.results[0].id,
-           image: response.data.results[0].thumbnail.path,
-           description: response.data.results[0].description
-         });
-
-       }.bind(this)
-
-   )
-  //  this.lookupstats()
- }
-
- getCharacterInfo(characterId) {
-   return characters.filter(character => character.id === characterId);
- }
 
  handleSubmit(event){
+   const heroName = event.target.value
+   console.log('===', heroName);
+   this.setState({
+     name: heroName
+   });
    event.preventDefault();
-   this.getData()
-   .then(response => this.getCharacterInfo(response.data.results[0].id))
-   .then(character => this.props.battle(character[0]));
- }
-
- handleChange(event) {
-  this.setState({userInput: event.target.value});
+   $.ajax({
+       url: `http://gateway.marvel.com:80/v1/public/characters?name=${heroName}&apikey=2e264257579ec772309983d87144e044`,
+       type: 'GET',
+       success: function(response) {
+         console.log(response);
+         this.setState({
+          id: response.data.results[0].id,
+          image: response.data.results[0].thumbnail.path,
+          description: response.data.results[0].description
+        });
+        console.log("state", this.state)
+       }.bind(this)
+   })
 }
-// lookupstats () {
-//   const stats = characters.filter (function (superhero) {return superhero.id === this.state.id})
-//   console.log("stats", stats);
-// }
  render() {
    return (
      <div>
        <form onSubmit={this.handleSubmit.bind(this)}>
          <label htmlFor="1st Superhero">Search for Superhero!</label>
-         <input type="text" name="superhero1" placeholder="1st Superhero" ref="superhero1"/>
-         <br />
-         <button>Search</button>
+          <br />
+           <select ref="selectBox" onChange={this.handleSubmit.bind(this)}>
+            <option value="">Select a Character</option>
+            {
+              characterlist.map(c => <option key={c.id} value={c.name}>{c.name}</option>)
+            }
+          </select>
        </form>
 
         <Character name={this.state.name} image={this.state.image} description={this.state.description} id={this.state.id}/>
+        <FilterCharacter id={this.state.id} name={this.state.name} characters={this.props.characters}/>
      </div>
    )
  }
